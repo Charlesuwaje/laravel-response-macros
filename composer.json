@@ -3,6 +3,7 @@
   "description": "Standard API response macros for Laravel",
   "type": "library",
   "license": "MIT",
+  "keywords": ["laravel", "api", "response", "macros", "json", "http"],
   "authors": [
     {
       "name": "Charles Uwaje",
@@ -14,12 +15,17 @@
     "illuminate/support": "^9.0|^10.0|^11.0|^12.0"
   },
   "require-dev": {
-    "orchestra/testbench": "^8.0 || ^9.0 || ^10.0",
-    "phpunit/phpunit": "^9.0 || ^10.0"
+    "orchestra/testbench": "^10.0",
+    "phpunit/phpunit": "^11.0 || ^12.0 || ^13.0"
   },
   "autoload": {
     "psr-4": {
       "CharlesUwaje\\ResponseMacros\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "CharlesUwaje\\ResponseMacros\\Tests\\": "tests/"
     }
   },
   "extra": {
@@ -28,5 +34,10 @@
         "CharlesUwaje\\ResponseMacros\\Providers\\ResponseMacrosServiceProvider"
       ]
     }
-  }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit"
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
 }

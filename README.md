@@ -1,6 +1,6 @@
 # Response Macros for Laravel
 
-A lightweight Laravel package that provides reusable JSON response macros — `success`, `error`, `created`, and more — to keep your API responses consistent and developer-friendly.
+A lightweight Laravel package that provides reusable JSON response macros to keep your API responses consistent and developer-friendly.
 
 ---
 
@@ -14,43 +14,25 @@ Laravel will auto-discover the service provider. No manual registration needed.
 
 ---
 
-## Development Installation (local or GitHub repo)
-
-Add to your `composer.json`:
-
-```json
-{
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/Charlesuwaje/response-macros"
-        }
-    ]
-}
-```
-
-Then run:
-
-```bash
-composer require charlesuwaje/response-macros:@dev
-```
-
----
-
 ## Available Macros
 
 | Macro | Status | Description |
 |---|---|---|
-| `response()->success($message, $data)` | 200 | Standard success response |
+| `response()->success($message, $data, $status)` | 200 | Standard success response |
 | `response()->created($message, $data)` | 201 | Resource created |
-| `response()->error($message, $data, $status)` | 400 | Generic error |
-| `response()->unauthorized($message)` | 401 | Not authenticated |
-| `response()->forbidden($message)` | 403 | Lacks permission |
-| `response()->notFound($message)` | 404 | Resource not found |
-| `response()->validationError($message, $errors)` | 422 | Validation failed |
+| `response()->accepted($message, $data)` | 202 | Request accepted (async/queued) |
 | `response()->noContent()` | 204 | Empty success response |
+| `response()->error($message, $data, $status)` | 400 | Generic error |
+| `response()->unauthorized($message, $data)` | 401 | Not authenticated |
+| `response()->forbidden($message, $data)` | 403 | Lacks permission |
+| `response()->notFound($message, $data)` | 404 | Resource not found |
+| `response()->methodNotAllowed($message, $data)` | 405 | HTTP method not allowed |
+| `response()->conflict($message, $data)` | 409 | Conflict (e.g. duplicate resource) |
+| `response()->validationError($message, $errors)` | 422 | Validation failed |
+| `response()->tooManyRequests($message, $data)` | 429 | Rate limit exceeded |
+| `response()->serverError($message, $data)` | 500 | Internal server error |
+| `response()->serviceUnavailable($message, $data)` | 503 | Service unavailable |
+| `response()->paginated($message, $data, $pagination)` | 200 | Paginated success response |
 
 ---
 
@@ -64,9 +46,14 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::all();
+        $users = User::paginate(15);
 
-        return response()->success('Users retrieved successfully', $users->toArray());
+        return response()->paginated('Users retrieved successfully', $users->items(), [
+            'total'        => $users->total(),
+            'per_page'     => $users->perPage(),
+            'current_page' => $users->currentPage(),
+            'last_page'    => $users->lastPage(),
+        ]);
     }
 
     public function store(Request $request)
@@ -110,33 +97,49 @@ class UserController extends Controller
 
 ## Response Format
 
-Success responses:
-
+**Success:**
 ```json
 {
     "status": "success",
-    "message": "Your message here",
-    "data": {}
+    "message": "Users retrieved successfully",
+    "data": []
 }
 ```
 
-Error responses:
+**Paginated:**
+```json
+{
+    "status": "success",
+    "message": "Users retrieved successfully",
+    "data": [],
+    "meta": {
+        "pagination": {
+            "total": 100,
+            "per_page": 15,
+            "current_page": 1,
+            "last_page": 7
+        }
+    }
+}
+```
 
+**Error:**
 ```json
 {
     "status": "error",
-    "message": "Your error message here",
+    "message": "Something went wrong",
     "data": {}
 }
 ```
 
-Validation error responses:
-
+**Validation error:**
 ```json
 {
-    "status": "validationError",
+    "status": "validation_error",
     "message": "Validation failed",
-    "errors": {}
+    "errors": {
+        "email": ["The email field is required."]
+    }
 }
 ```
 
